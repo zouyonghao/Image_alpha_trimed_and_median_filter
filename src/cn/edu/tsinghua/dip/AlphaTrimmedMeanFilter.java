@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 public class AlphaTrimmedMeanFilter {
 
-    private static int alpha = 12;
+    private static int alpha = 7;
     private static int filterSize = 5;
 
     public static void main(String[] args) throws IOException {
@@ -33,22 +33,27 @@ public class AlphaTrimmedMeanFilter {
         int down = j + filterSize / 2;
         int[] result = new int[filterSize * filterSize];
         int count = 0;
+        // 获取区域内像素值
         for (int a = left; a <= right; a++) {
             for (int b = top; b <= down; b++) {
-                if (a < 0 || a >= srcImg.getWidth() || b < 0 || b >= srcImg.getHeight()) {
-                    // pass
-                } else {
+                if (a >= 0 && a < srcImg.getWidth() && b >= 0 && b < srcImg.getHeight()) {
                     result[count++] = srcImg.getRaster().getSample(a, b, 0);
                 }
             }
         }
+        // 排序
         Arrays.sort(result);
         int mean = 0;
+        if (count - 2 * alpha <= 0) {
+            for (int a = 0; a < count; a++) {
+                mean += result[a];
+            }
+            return mean / count;
+        }
+        // 去除最小和最大区域
+        // alpha 相当于教材中的 d/2
         for (int a = alpha; a < count - alpha; a++) {
             mean += result[a];
-        }
-        if (count - 2 * alpha <= 0) {
-            return mean / count;
         }
         return mean / (count - 2 * alpha);
     }
